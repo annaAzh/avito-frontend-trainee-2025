@@ -1,10 +1,10 @@
-import { Button, Container } from '@/shared/components/ui';
+import { Container } from '@/shared/components/ui';
+import { RouteProvider } from './providers/routerProvider/routerProvider';
 
 function App() {
-
   return (
     <Container className="mt-10 text-center">
-      <Button variant="default">Start project</Button>
+      <RouteProvider />
     </Container>
   );
 }
