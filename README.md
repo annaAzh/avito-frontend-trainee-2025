@@ -1,0 +1,1 @@
+# avito-frontend-trainee-2025
