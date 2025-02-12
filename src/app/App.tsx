@@ -1,11 +1,11 @@
-import { Container } from '@/shared/components/ui';
+import { QueryProvider } from './providers/queryProvider/queryProvider';
 import { RouteProvider } from './providers/routerProvider/routerProvider';
 
 function App() {
   return (
-    <Container className="mt-10 text-center">
+    <QueryProvider>
       <RouteProvider />
-    </Container>
+    </QueryProvider>
   );
 }
 
