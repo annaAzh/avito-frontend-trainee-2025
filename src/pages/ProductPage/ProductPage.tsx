@@ -2,11 +2,11 @@ import { Button, Container } from '@/shared/components/ui';
 import { Header } from '@/widget/Header/Header';
 import { FC, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { imagePlaceholder } from '../CatalogPage/CatalogPage';
 import { cn } from '@/shared/lib/utils';
 import { Paths } from '@/shared/types';
 import { useDeleteItemById, useItem } from '@/shared/hooks/useQueryAndMutation';
 import toast from 'react-hot-toast';
+import { IMAGE_PLACEHOLDER } from '@/shared/constants';
 
 export const ProductPage: FC = () => {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export const ProductPage: FC = () => {
         <div className="flex flex-col md:flex-row gap-5">
           <div className="max-w-[300px] h-[300px] md:max-w-[400px] md:h-[400px] flex-shrink-0">
             <img
-              src={product.image || imagePlaceholder}
+              src={product.image || IMAGE_PLACEHOLDER}
               alt={product.name}
               className={cn('object-cover w-full h-full ', { 'rounded-lg shadow-md': product.image })}
             ></img>
