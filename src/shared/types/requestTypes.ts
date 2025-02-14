@@ -19,7 +19,7 @@ interface Auto extends BaseItem {
   brand: string;
   model: string;
   year: number;
-  milage?: number;
+  mileage?: number;
 }
 
 interface Services extends BaseItem {
