@@ -24,6 +24,10 @@ const router = createBrowserRouter([
     element: <FormPage />,
   },
   {
+    path: `${Paths.FORM_EDIT}`,
+    element: <FormPage />,
+  },
+  {
     path: `${Paths.NOT_FOUND}`,
     element: <NotFoundPage />,
   },

@@ -117,7 +117,7 @@ export const ProductPage: FC = () => {
               </div>
             )}
 
-            <Button loading={loadingDelete} variant="outline" onClick={() => navigate(Paths.FORM)}>
+            <Button loading={loadingDelete} variant="outline" onClick={() => navigate(`${Paths.FORM}/${id}`)}>
               Редактировать объявление
             </Button>
 
