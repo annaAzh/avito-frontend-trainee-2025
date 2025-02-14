@@ -1,22 +1,39 @@
 import { Button, Container } from '@/shared/components/ui';
 import { Header } from '@/widget/Header/Header';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { imagePlaceholder } from '../CatalogPage/CatalogPage';
 import { cn } from '@/shared/lib/utils';
 import { Paths } from '@/shared/types';
-import { useItem } from '@/shared/hooks/useQueryAndMutation';
+import { useDeleteItemById, useItem } from '@/shared/hooks/useQueryAndMutation';
+import toast from 'react-hot-toast';
 
 export const ProductPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const { data, isLoading, error } = useItem(id || '');
+  const mutation = useDeleteItemById(id || '');
   const product = data?.data;
 
   if (!product) return <p>Продукт не найден</p>;
   if (isLoading) return <p>Loading</p>;
   if (error) return <p>Ошибка загрузки</p>;
+
+  const handleDeleteItem = async () => {
+    setLoadingDelete(true);
+    try {
+      await mutation.mutateAsync();
+      toast.success('Объявление успешно удалено');
+      navigate(Paths.LIST);
+    } catch {
+      toast.error('Ошибка при удалении объявления');
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
 
   return (
     <>
@@ -100,8 +117,12 @@ export const ProductPage: FC = () => {
               </div>
             )}
 
-            <Button variant="destructive" onClick={() => navigate(Paths.FORM)}>
+            <Button loading={loadingDelete} variant="outline" onClick={() => navigate(Paths.FORM)}>
               Редактировать объявление
+            </Button>
+
+            <Button loading={loadingDelete} variant="destructive" onClick={handleDeleteItem}>
+              Удалить объявление
             </Button>
           </div>
         </div>
