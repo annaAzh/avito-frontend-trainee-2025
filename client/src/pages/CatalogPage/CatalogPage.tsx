@@ -3,6 +3,7 @@ import { SearchInput } from '@/feature/Search/SearchInput';
 import { Button, Container } from '@/shared/components/ui';
 import { IMAGE_PLACEHOLDER } from '@/shared/constants';
 import { useFilteredItem } from '@/shared/hooks/useFilteredItems';
+import { useItems } from '@/shared/hooks/useQueryAndMutation';
 import { Header } from '@/widget/Header/Header';
 import { PaginationComponent } from '@/widget/Pagination/Pagination';
 import { MapPin } from 'lucide-react';
@@ -10,6 +11,8 @@ import { FC } from 'react';
 import { Link } from 'react-router-dom';
 
 export const CatalogPage: FC = () => {
+  useItems();
+
   const {
     isLoading,
     error,

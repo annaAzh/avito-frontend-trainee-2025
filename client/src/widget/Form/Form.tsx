@@ -101,6 +101,7 @@ export const Form: FC<Props> = ({
         toast.success('Объявление было опубликовано');
 
         form.reset();
+
         navigate(Paths.LIST);
       } else {
         toast.success('Произошла ошибка при публикации объявления');
