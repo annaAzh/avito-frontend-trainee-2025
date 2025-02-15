@@ -8,9 +8,15 @@ const apiRequest = async <T>(
   config?: AxiosRequestConfig,
 ): Promise<ApiResponse<T>> => {
   try {
+    const isFormData = config?.data instanceof FormData;
+
     const response = await axiosInstance.request<T>({
       method,
       url,
+      headers: {
+        ...(isFormData ? { 'Content-Type': 'multipart/form-data' } : {}),
+        ...config?.headers,
+      },
       ...config,
     });
 
