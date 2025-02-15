@@ -1,54 +1,38 @@
+import { Filter } from '@/feature/Filter/Filter';
 import { SearchInput } from '@/feature/Search/SearchInput';
 import { Button, Container } from '@/shared/components/ui';
-import { IMAGE_PLACEHOLDER, ITEMS_PER_PAGE } from '@/shared/constants';
-import { useDebounce } from '@/shared/hooks/useDebounce';
-import { useItems } from '@/shared/hooks/useQueryAndMutation';
-import { ItemResponse } from '@/shared/types';
+import { IMAGE_PLACEHOLDER } from '@/shared/constants';
+import { useFilteredItem } from '@/shared/hooks/useFilteredItems';
 import { Header } from '@/widget/Header/Header';
 import { PaginationComponent } from '@/widget/Pagination/Pagination';
 import { MapPin } from 'lucide-react';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 
 export const CatalogPage: FC = () => {
-  const { data, isLoading, error } = useItems();
-
-  const [renderedData, setRenderedData] = useState<ItemResponse[] | []>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const debouncedQuery = useDebounce(searchQuery, 250);
-
-  useEffect(() => {
-    if (data?.data && data?.success) {
-      const findBySearchQuery = data.data?.filter((el) => el.name.toLowerCase().includes(debouncedQuery.toLowerCase()));
-
-      setRenderedData(findBySearchQuery.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE) || []);
-    }
-  }, [currentPage, data, debouncedQuery]);
+  const {
+    isLoading,
+    error,
+    handleChangeFilters,
+    handleChangeSearch,
+    renderedData,
+    searchQuery,
+    onPageChange,
+    currentPage,
+    pages,
+  } = useFilteredItem();
 
   if (isLoading) return <p>Loading</p>;
   if (error) return <p>Ошибка загрузки</p>;
-
-  if (!data?.success || !data.data || data.data.length === 0) return <p>Объявления не найдены</p>;
-
-  const totalItems = data.data.filter((el) => el.name.toLowerCase().includes(debouncedQuery.toLowerCase())).length;
-  const pages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
-  const onPageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleChangeSearch = (value: string) => {
-    setSearchQuery(value);
-  };
 
   return (
     <>
       <Header />
       <Container>
         <div className="flex flex-col">
-          <div className="my-4">
+          <div className="my-4 flex gap-4 items-center flex-wrap">
             <SearchInput onChangeSearch={handleChangeSearch} searchQuery={searchQuery} />
+            <Filter onFilterChange={handleChangeFilters} />
           </div>
 
           <h1 className="my-8  text-center text-3xl font-extrabold">Объявления</h1>

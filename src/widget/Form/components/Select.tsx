@@ -9,6 +9,7 @@ import {
 } from '@/shared/components/ui/';
 import { FC } from 'react';
 import { RequiredSymbol } from './RequiredSymbol';
+import { cn } from '@/shared/lib/utils';
 
 interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {
   className?: string;
@@ -21,9 +22,18 @@ interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {
   callBack: (value: string) => void;
 }
 
-const SelectForm: FC<Props> = ({ name, required, items = [], placeholder, label, select_label, callBack }) => {
+const SelectForm: FC<Props> = ({
+  name,
+  required,
+  items = [],
+  placeholder,
+  label,
+  select_label,
+  callBack,
+  className,
+}) => {
   return (
-    <>
+    <div className={cn('', className)}>
       <div>
         {label}
         {required && <RequiredSymbol />}
@@ -47,7 +57,7 @@ const SelectForm: FC<Props> = ({ name, required, items = [], placeholder, label,
           </SelectGroup>
         </SelectContent>
       </Select>
-    </>
+    </div>
   );
 };
 
