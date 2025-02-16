@@ -38,4 +38,4 @@ const getPaginationArray = (totalPage: number, page: number, siblings: number) =
   }
 };
 
-export { getPaginationArray };
+export { getPaginationArray, getRangeArray };
