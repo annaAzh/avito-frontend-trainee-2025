@@ -1,7 +1,7 @@
 import { cn } from '@/shared/lib/utils';
 import { FC, useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui';
 import { auto, realEstate, services } from './constants';
 import { ItemSchema, itemSchema } from '@/shared/lib/schemas/itemSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,9 +9,10 @@ import { useAddNewItem, useUpdateItemById } from '@/shared/hooks/useQueryAndMuta
 import { Auto, ItemRequest, Paths, RealEstate, Services } from '@/shared/types';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui';
 import { ExtraFields } from './types';
 import { RequiredSymbol } from './components/RequiredSymbol';
+import { FormInput } from './components/FormInput';
+import { ExtraFormFields } from './ExtraFormFields';
 
 interface Props {
   className?: string;
@@ -34,8 +35,9 @@ export const FormComponent: FC<Props> = ({
     defaultValues,
     mode: 'onChange',
   });
-  const { control, setValue, watch } = form;
-  const type = useWatch({ control, name: 'type' });
+  const { control, watch, setValue, reset, handleSubmit } = form;
+
+  const type = watch('type');
 
   const mutation = useAddNewItem();
   const updateMutation = useUpdateItemById();
@@ -50,7 +52,7 @@ export const FormComponent: FC<Props> = ({
       if (result.success) {
         toast.success('Объявление было опубликовано');
 
-        form.reset();
+        reset();
 
         navigate(Paths.LIST);
       } else {
@@ -77,15 +79,8 @@ export const FormComponent: FC<Props> = ({
   }, [type]);
 
   useEffect(() => {
-    Object.keys(extraFields).forEach((key, i) => {
-      if (extraFields[i].parentType === type) return;
-      if (extraFields[i].parentType !== type) {
-        setValue(extraFields[Number(key)].name, '');
-      }
-    });
-  }, [extraFields, setValue]);
+    if (isEditing) return;
 
-  useEffect(() => {
     const savedData = localStorage.getItem('formData');
     if (savedData) {
       const parsedData = JSON.parse(savedData);
@@ -104,127 +99,50 @@ export const FormComponent: FC<Props> = ({
   }, [watch]);
 
   return (
-    <Form {...form}>
-      <form className={cn('flex justify-center', className)} onSubmit={form.handleSubmit(submitForm)}>
+    <FormProvider {...form}>
+      <form className={cn('flex justify-center', className)} onSubmit={handleSubmit(submitForm)}>
         <div className="flex flex-col flex-1 gap-4 max-w-[600px]">
-          <FormField
-            control={form.control}
+          <Controller
+            control={control}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <label>
-                  Название <RequiredSymbol />
-                </label>
-                <FormControl>
-                  <Input placeholder="name" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+            render={() => <FormInput label="Название" name="name" required />}
           />
-          <FormField
-            control={form.control}
+          <Controller
+            control={control}
             name="description"
-            render={({ field }) => (
-              <FormItem>
-                <label>
-                  Описание <RequiredSymbol />
-                </label>
-                <FormControl>
-                  <Input placeholder="Введите описание" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={() => <FormInput label="Описание" name="description" required />}
           />
-
-          <FormField
-            control={form.control}
+          <Controller
+            control={control}
             name="location"
-            render={({ field }) => (
-              <FormItem>
-                <label>
-                  Локация <RequiredSymbol />
-                </label>
-                <FormControl>
-                  <Input placeholder="Введите локацию" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={() => <FormInput label="Локация" name="location" required />}
           />
+          <Controller control={control} name="image" render={() => <FormInput label="Фото" name="image" />} />
 
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <label>Фото</label>
-                <FormControl>
-                  <Input placeholder="Введите ссылку на изображение" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
+          <Controller
+            control={control}
             name="type"
             render={({ field }) => (
-              <FormItem>
+              <>
                 <label>
                   Категория объявления <RequiredSymbol />
                 </label>
-                <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выбери категорию объявления" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Недвижимость">Недвижимость</SelectItem>
-                      <SelectItem value="Авто">Авто</SelectItem>
-                      <SelectItem value="Услуги">Услуги</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выбери категорию объявления" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Недвижимость">Недвижимость</SelectItem>
+                    <SelectItem value="Авто">Авто</SelectItem>
+                    <SelectItem value="Услуги">Услуги</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>
             )}
           />
 
           {extraFields.map((element) => (
-            <FormField
-              key={element.id}
-              control={form.control}
-              name={element.name}
-              render={({ field }) => (
-                <FormItem>
-                  <label>
-                    {element.label} {element.required && <RequiredSymbol />}
-                  </label>
-                  <FormControl>
-                    {element.domElement === 'input' ? (
-                      <Input placeholder={element.label} {...field} />
-                    ) : (
-                      <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={element.label} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {element.items &&
-                            element.items.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
-                                {item.value}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <ExtraFormFields element={element} control={control} key={element.name} />
           ))}
 
           <Button loading={form.formState.isSubmitting} type="submit" className="w-fit mx-auto">
@@ -232,6 +150,6 @@ export const FormComponent: FC<Props> = ({
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
