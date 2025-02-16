@@ -5,6 +5,7 @@ type ExtraFields = {
   required: boolean;
   type: 'string' | 'number';
   domElement: 'input' | 'select';
+  parentType: 'Авто' | 'Недвижимость' | 'Услуги';
   items?: { label?: string; value: string }[];
 };
 

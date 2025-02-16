@@ -152,6 +152,7 @@ const services_serviceType = [
 const realEstate: ExtraFields[] = [
   {
     id: 1,
+    parentType: 'Недвижимость',
     name: 'propertyType',
     label: 'Тип недвижимости',
     required: true,
@@ -161,6 +162,7 @@ const realEstate: ExtraFields[] = [
   },
   {
     id: 2,
+    parentType: 'Недвижимость',
     name: 'area',
     label: 'Площадь(кв. м)',
     required: true,
@@ -169,6 +171,7 @@ const realEstate: ExtraFields[] = [
   },
   {
     id: 3,
+    parentType: 'Недвижимость',
     name: 'rooms',
     label: 'Количество комнат',
     required: true,
@@ -177,6 +180,7 @@ const realEstate: ExtraFields[] = [
   },
   {
     id: 4,
+    parentType: 'Недвижимость',
     name: 'price',
     label: 'Цена',
     required: true,
@@ -187,6 +191,7 @@ const realEstate: ExtraFields[] = [
 const auto: ExtraFields[] = [
   {
     id: 1,
+    parentType: 'Авто',
     name: 'brand',
     label: 'Марка',
     required: true,
@@ -194,14 +199,31 @@ const auto: ExtraFields[] = [
     domElement: 'select',
     items: auto_brand,
   },
-  { id: 2, name: 'model', label: 'Модель', required: true, type: 'string', domElement: 'input' },
-  { id: 3, name: 'year', label: 'Год выпуска', required: true, type: 'number', domElement: 'input' },
-  { id: 4, name: 'mileage', label: 'Пробег(км)', required: false, type: 'number', domElement: 'input' },
+  { id: 2, parentType: 'Авто', name: 'model', label: 'Модель', required: true, type: 'string', domElement: 'input' },
+  {
+    id: 3,
+    parentType: 'Авто',
+    name: 'year',
+    label: 'Год выпуска',
+    required: true,
+    type: 'number',
+    domElement: 'input',
+  },
+  {
+    id: 4,
+    parentType: 'Авто',
+    name: 'mileage',
+    label: 'Пробег(км)',
+    required: false,
+    type: 'number',
+    domElement: 'input',
+  },
 ];
 
 const services: ExtraFields[] = [
   {
     id: 1,
+    parentType: 'Услуги',
     name: 'serviceType',
     label: 'Тип услуги',
     required: true,
@@ -209,9 +231,33 @@ const services: ExtraFields[] = [
     domElement: 'select',
     items: services_serviceType,
   },
-  { id: 2, name: 'experience', label: 'Опыт работы (лет)', required: true, type: 'number', domElement: 'input' },
-  { id: 3, name: 'cost', label: 'Стоимость', required: true, type: 'number', domElement: 'input' },
-  { id: 4, name: 'workSchedule', label: 'График работы', required: false, type: 'string', domElement: 'input' },
+  {
+    id: 2,
+    parentType: 'Услуги',
+    name: 'experience',
+    label: 'Опыт работы (лет)',
+    required: true,
+    type: 'number',
+    domElement: 'input',
+  },
+  {
+    id: 3,
+    parentType: 'Услуги',
+    name: 'cost',
+    label: 'Стоимость',
+    required: true,
+    type: 'number',
+    domElement: 'input',
+  },
+  {
+    id: 4,
+    parentType: 'Услуги',
+    name: 'workSchedule',
+    label: 'График работы',
+    required: false,
+    type: 'string',
+    domElement: 'input',
+  },
 ];
 
 export { realEstate_propertyType, auto_brand, realEstate, auto, services_serviceType, services };

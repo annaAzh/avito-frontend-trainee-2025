@@ -1,23 +1,17 @@
 import { cn } from '@/shared/lib/utils';
 import { FC, useEffect, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
-import { Button } from '@/shared/components/ui';
-import { FormInput } from './components/FormInput';
-import { SelectForm } from './components/Select';
-import { ExtraFields, FieldName } from './types';
+import { useForm, useWatch } from 'react-hook-form';
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui';
 import { auto, realEstate, services } from './constants';
-import { autoSchema, ItemSchema, itemSchema, realEstateSchema, serviceSchema } from '@/shared/lib/schemas/itemSchema';
+import { ItemSchema, itemSchema } from '@/shared/lib/schemas/itemSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAddNewItem, useUpdateItemById } from '@/shared/hooks/useQueryAndMutation';
 import { Auto, ItemRequest, Paths, RealEstate, Services } from '@/shared/types';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
-const schemaMap = {
-  Недвижимость: realEstateSchema,
-  Авто: autoSchema,
-  Услуги: serviceSchema,
-};
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui';
+import { ExtraFields } from './types';
+import { RequiredSymbol } from './components/RequiredSymbol';
 
 interface Props {
   className?: string;
@@ -26,7 +20,7 @@ interface Props {
   id?: string;
 }
 
-export const Form: FC<Props> = ({
+export const FormComponent: FC<Props> = ({
   className,
   isEditing,
   id,
@@ -40,52 +34,8 @@ export const Form: FC<Props> = ({
     defaultValues,
     mode: 'onChange',
   });
-  const { control, setValue, trigger } = form;
+  const { control, setValue, watch } = form;
   const type = useWatch({ control, name: 'type' });
-  const propertyType = useWatch({ control, name: 'propertyType' });
-  const brand = useWatch({ control, name: 'brand' });
-  const serviceType = useWatch({ control, name: 'serviceType' });
-
-  useEffect(() => {
-    if (type && schemaMap[type]) {
-      const saveData = {
-        name: form.getValues('name'),
-        description: form.getValues('description'),
-        image: form.getValues('image'),
-        location: form.getValues('location'),
-      };
-      form.reset();
-      setValue('type', type);
-      setValue('name', saveData.name);
-      setValue('description', saveData.description);
-      setValue('image', saveData.image);
-      setValue('location', saveData.location);
-    }
-  }, [type]);
-
-  useEffect(() => {
-    if (propertyType) {
-      setValue('area', 0);
-      setValue('rooms', 0);
-      setValue('price', 0);
-      setValue('type', type);
-      setValue('propertyType', propertyType);
-    }
-    if (brand) {
-      setValue('mileage', 0);
-      setValue('year', new Date().getFullYear());
-      setValue('model', '');
-      setValue('type', type);
-      setValue('brand', brand);
-    }
-    if (serviceType) {
-      setValue('experience', 0);
-      setValue('cost', 0);
-      setValue('workSchedule', '');
-      setValue('type', type);
-      setValue('serviceType', serviceType);
-    }
-  }, [propertyType, brand, serviceType]);
 
   const mutation = useAddNewItem();
   const updateMutation = useUpdateItemById();
@@ -104,7 +54,7 @@ export const Form: FC<Props> = ({
 
         navigate(Paths.LIST);
       } else {
-        toast.success('Произошла ошибка при публикации объявления');
+        toast.error('Произошла ошибка при публикации объявления');
       }
     } else if (isEditing && id) {
       const result = await updateMutation.mutateAsync({ id, data: cleanedData });
@@ -116,82 +66,172 @@ export const Form: FC<Props> = ({
     }
   };
 
-  const handleChangeCategory = (value: string) => {
-    if (value === 'realEstate') {
+  useEffect(() => {
+    if (type === 'Недвижимость') {
       setExtraFields(realEstate);
-      setValue('type', 'Недвижимость');
-    } else if (value === 'auto') {
+    } else if (type === 'Авто') {
       setExtraFields(auto);
-      setValue('type', 'Авто');
-    } else if (value === 'services') {
+    } else if (type === 'Услуги') {
       setExtraFields(services);
-      setValue('type', 'Услуги');
-    } else {
-      setExtraFields([]);
     }
+  }, [type]);
 
-    trigger('type');
-  };
+  useEffect(() => {
+    Object.keys(extraFields).forEach((key, i) => {
+      if (extraFields[i].parentType === type) return;
+      if (extraFields[i].parentType !== type) {
+        setValue(extraFields[Number(key)].name, '');
+      }
+    });
+  }, [extraFields, setValue]);
 
-  const handleInnerSelects = (name: FieldName, value: string) => {
-    setValue(name, value);
-  };
+  useEffect(() => {
+    const savedData = localStorage.getItem('formData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      for (const key in parsedData) {
+        setValue(key as keyof ItemSchema, parsedData[key]);
+      }
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      localStorage.setItem('formData', JSON.stringify(value));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   return (
-    <FormProvider {...form}>
+    <Form {...form}>
       <form className={cn('flex justify-center', className)} onSubmit={form.handleSubmit(submitForm)}>
         <div className="flex flex-col flex-1 gap-4 max-w-[600px]">
-          <FormInput name="name" required={true} label="Название" type="text" />
-          <FormInput name="description" required={true} label="Описание" type="text" />
-          <FormInput name="location" required={true} label="Локация" type="text" />
-          <FormInput name="image" required={false} label="Ссылка на изображение" type="text" />
-
-          <SelectForm
-            name="type"
-            required={true}
-            callBack={handleChangeCategory}
-            placeholder="Выбери категорию объявления"
-            label="Категория объявления"
-            select_label="Категория объявления"
-            items={[
-              { label: 'Недвижимость', value: 'realEstate' },
-              { label: 'Авто', value: 'auto' },
-              { label: 'Услуги', value: 'services' },
-            ]}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <label>
+                  Название <RequiredSymbol />
+                </label>
+                <FormControl>
+                  <Input placeholder="name" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
           />
-          {extraFields &&
-            extraFields.length > 0 &&
-            extraFields.map((element) => {
-              return (
-                <li key={element.id} className="list-none">
-                  {element.domElement === 'input' && (
-                    <FormInput
-                      name={element.name}
-                      required={element.required}
-                      label={element.label}
-                      type={element.type}
-                    />
-                  )}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <label>
+                  Описание <RequiredSymbol />
+                </label>
+                <FormControl>
+                  <Input placeholder="Введите описание" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                  {element.domElement === 'select' && (
-                    <SelectForm
-                      name={element.name}
-                      required={element.required}
-                      callBack={(value) => handleInnerSelects(element.name, value)}
-                      items={element.items}
-                      placeholder={element.label}
-                      select_label={element.label}
-                      label={element.label}
-                    />
-                  )}
-                </li>
-              );
-            })}
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <label>
+                  Локация <RequiredSymbol />
+                </label>
+                <FormControl>
+                  <Input placeholder="Введите локацию" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <label>Фото</label>
+                <FormControl>
+                  <Input placeholder="Введите ссылку на изображение" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <label>
+                  Категория объявления <RequiredSymbol />
+                </label>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выбери категорию объявления" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Недвижимость">Недвижимость</SelectItem>
+                      <SelectItem value="Авто">Авто</SelectItem>
+                      <SelectItem value="Услуги">Услуги</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {extraFields.map((element) => (
+            <FormField
+              key={element.id}
+              control={form.control}
+              name={element.name}
+              render={({ field }) => (
+                <FormItem>
+                  <label>
+                    {element.label} {element.required && <RequiredSymbol />}
+                  </label>
+                  <FormControl>
+                    {element.domElement === 'input' ? (
+                      <Input placeholder={element.label} {...field} />
+                    ) : (
+                      <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={element.label} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {element.items &&
+                            element.items.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.value}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+
           <Button loading={form.formState.isSubmitting} type="submit" className="w-fit mx-auto">
             {isEditing ? 'Сохранить изменения' : 'Загрузить'}
           </Button>
         </div>
       </form>
-    </FormProvider>
+    </Form>
   );
 };
