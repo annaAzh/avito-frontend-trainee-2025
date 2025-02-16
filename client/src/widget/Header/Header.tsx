@@ -9,13 +9,19 @@ export const Header: FC = () => {
   return (
     <div className="bg-gray-200 py-4">
       <Container>
-        <div className="flex gap-4 justify-between items-center">
-          <Link to={Paths.LIST} className="hover:text-gray-600 transition-colors duration-200 font-medium">
-            Объявления
+        <div className="flex flex-wrap gap-5 justify-between items-center">
+          <Link to={Paths.LIST}>
+            <img src="/assets/icons/logo.svg" alt="logo" className="max-h-[28px]" />
           </Link>
-          <Button variant="outline" className="cursor-pointer" onClick={() => navigate(Paths.FORM)}>
-            Разместить объявление
-          </Button>
+
+          <div className="flex-1 md:ml-auto flex gap-5 justify-end items-center">
+            <Link to={Paths.LIST} className="hover:text-gray-600 transition-colors duration-200 font-medium text-xl">
+              Объявления
+            </Link>
+            <Button variant="outline" className="cursor-pointer" onClick={() => navigate(Paths.FORM)}>
+              Разместить объявление
+            </Button>
+          </div>
         </div>
       </Container>
     </div>
