@@ -1,4 +1,4 @@
-import { Button, Container } from '@/shared/components/ui';
+import { Button, Container, Loader } from '@/shared/components/ui';
 import { FC, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
@@ -18,7 +18,7 @@ export const ProductPage: FC = () => {
   const product = data?.data;
 
   if (!product) return <p>Продукт не найден</p>;
-  if (isLoading) return <p>Loading</p>;
+  if (isLoading) return <Loader />;
   if (error) return <p>Ошибка загрузки</p>;
 
   const handleDeleteItem = async () => {

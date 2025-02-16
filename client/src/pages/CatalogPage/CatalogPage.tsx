@@ -1,6 +1,6 @@
 import { Filter } from '@/feature/Filter/Filter';
 import { SearchInput } from '@/feature/Search/SearchInput';
-import { Button, Container } from '@/shared/components/ui';
+import { Button, Container, Loader } from '@/shared/components/ui';
 import { IMAGE_PLACEHOLDER } from '@/shared/constants';
 import { useFilteredItem } from '@/shared/hooks/useFilteredItems';
 import { useItems } from '@/shared/hooks/useQueryAndMutation';
@@ -24,7 +24,7 @@ export const CatalogPage: FC = () => {
     pages,
   } = useFilteredItem();
 
-  if (isLoading) return <p>Loading</p>;
+  if (isLoading) return <Loader />;
   if (error) return <p>Ошибка загрузки</p>;
 
   return (

@@ -11,3 +11,4 @@ export {
   PaginationNext,
   PaginationPrevious,
 } from './pagination';
+export { Loader } from './loader';
